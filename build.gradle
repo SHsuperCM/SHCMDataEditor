@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group 'shcm.shsupercm.data.editor'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation "com.github.SHsuperCM:SHCMData:1.4-14"
+}
