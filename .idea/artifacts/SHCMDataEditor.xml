@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="SHCMDataEditor">
-    <output-path>$PROJECT_DIR$/out/artifacts</output-path>
-    <root id="archive" name="shcmdataeditor.jar">
-      <element id="module-output" name="shcmdataeditor" />
-      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.SHsuperCM/SHCMData/1.4-14/f99678c417e40587e4b2731489198fe15081a313/SHCMData-1.4-14.jar" path-in-jar="/" />
-    </root>
-  </artifact>
-</component>
