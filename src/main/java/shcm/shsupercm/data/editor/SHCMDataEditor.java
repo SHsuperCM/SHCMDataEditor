@@ -6,14 +6,13 @@ import javax.swing.*;
 
 public class SHCMDataEditor {
 
-    public static final int version = 0;
+    public static final String version = "UNUSABLE_ALPHA";
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-        //todo
+        //todo handle file opening
 
-        JFrameSHCMDataEditor mainFrame = new JFrameSHCMDataEditor();
-        mainFrame.setVisible(true);
+        new JFrameSHCMDataEditor().setVisible(true);
     }
 }
