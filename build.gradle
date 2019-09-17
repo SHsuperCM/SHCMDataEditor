@@ -3,9 +3,20 @@ plugins {
 }
 
 group 'shcm.shsupercm.data.editor'
-version '1.0'
+version
 
 sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'shcm.shsupercm.data.editor.SHCMDataEditor'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 repositories {
     mavenCentral()

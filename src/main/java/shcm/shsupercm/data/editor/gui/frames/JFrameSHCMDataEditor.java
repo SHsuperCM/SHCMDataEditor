@@ -8,6 +8,7 @@ import shcm.shsupercm.data.framework.DataBlock;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -16,10 +17,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class JFrameSHCMDataEditor extends JFrame {
-    private OpenFileHandler openFileHandler = null;
+    private OpenFileHandler openFileHandler;
 
-    public JFrameSHCMDataEditor() throws HeadlessException {
-        this.setTitle("SHCMData Editor");
+    public JFrameSHCMDataEditor(OpenFileHandler openFileHandlerIN) throws HeadlessException {
+        this.openFileHandler = openFileHandlerIN;
         this.setSize(750,660);
         this.setResizable(false);
         this.addWindowListener(new WindowEvents());
@@ -32,7 +33,7 @@ public class JFrameSHCMDataEditor extends JFrame {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(openFileHandler != null) {
-                            int option = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "What do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Open in a new window", "Don't Save", "Back"}, "Open in a new window");
+                            int option = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "Where do I open this new file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"New window", "This window", "Cancel"}, "New window");
                             if (option == 0) {
                                 try {
                                     new ProcessBuilder("java", "-jar", new File(SHCMDataEditor.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath(), "New").start();
@@ -40,39 +41,110 @@ public class JFrameSHCMDataEditor extends JFrame {
                                     ex.printStackTrace();
                                 }
                             } else if (option == 1) {
+                                if(openFileHandler.changed) {
+                                    int optionSave = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "You can't just close the window!\nWhat do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Save", "Don't Save", "Back"}, "Save");
+                                    if(optionSave == 2)
+                                        return;
+                                    if(optionSave == 0)
+                                        openFileHandler.save();
+                                }
                                 openFileHandler = new OpenFileHandler(new DataBlock());
                             }
+                        } else {
+                            openFileHandler = new OpenFileHandler(new DataBlock());
                         }
+                        refresh();
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('N', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
                 this.add(new JMenuItem(new AbstractAction("Open") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(this.getValue("Name"));
+                        JFileChooser openDialog = new JFileChooser();
+
+                        openDialog.setDialogType(JFileChooser.OPEN_DIALOG);
+                        openDialog.setSelectedFile(new File("file.shcmd"));
+                        openDialog.setFileFilter(new FileNameExtensionFilter("SHCMData File", "shcmd"));
+                        openDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                        openDialog.setMultiSelectionEnabled(false);
+
+                        if(openDialog.showOpenDialog(JFrameSHCMDataEditor.this) == JFileChooser.APPROVE_OPTION && openDialog.getSelectedFile().exists()) {
+                            if(openFileHandler != null) {
+                                int option = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "Where do I open this file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"New window", "This window", "Cancel"}, "New window");
+                                if (option == 0) {
+                                    try {
+                                        new ProcessBuilder("java", "-jar", new File(SHCMDataEditor.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath(), openDialog.getSelectedFile().getAbsolutePath()).start();
+                                    } catch (IOException | URISyntaxException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                } else if (option == 1) {
+                                    if(openFileHandler.changed) {
+                                        int optionSave = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "You can't just close this file!!\nWhat do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Save", "Don't Save", "Back"}, "Save");
+                                        if(optionSave == 2)
+                                            return;
+                                        if(optionSave == 0)
+                                            openFileHandler.save();
+                                    }
+                                    openFileHandler = new OpenFileHandler(openDialog.getSelectedFile());
+                                }
+                            } else {
+                                openFileHandler = new OpenFileHandler(openDialog.getSelectedFile());
+                            }
+                        }
+
+                        refresh();
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('O', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
                 this.add(new JMenuItem(new AbstractAction("Reload") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(this.getValue("Name"));
+                        if(openFileHandler != null) {
+                            openFileHandler.reload();
+                            refresh();
+                        }
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('R', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
                 this.add(new JMenuItem(new AbstractAction("Save") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(this.getValue("Name"));
+                        if(openFileHandler != null) {
+                            if(openFileHandler.getFile() == null) {
+                                menu.getMenu(0).getItem(4).getAction().actionPerformed(e);
+                            } else {
+                                openFileHandler.save();
+                                refresh();
+                            }
+                        }
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
                 this.add(new JMenuItem(new AbstractAction("Save As") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(this.getValue("Name"));
+                        if(openFileHandler != null) {
+                            JFileChooser saveDialog = new JFileChooser();
+
+                            saveDialog.setDialogType(JFileChooser.SAVE_DIALOG);
+                            saveDialog.setSelectedFile(new File("file.shcmd"));
+                            saveDialog.setFileFilter(new FileNameExtensionFilter("SHCMData File", "shcmd"));
+
+                            if(saveDialog.showSaveDialog(JFrameSHCMDataEditor.this) == JFileChooser.APPROVE_OPTION) {
+                                if(saveDialog.getSelectedFile().exists()) {
+                                    if (JOptionPane.showConfirmDialog(null, "Do you want to replace the existing file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
+                                        this.actionPerformed(e);
+                                        return;
+                                    }
+                                }
+                                openFileHandler.saveAs(saveDialog.getSelectedFile());
+                            }
+                            refresh();
+                        }
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | InputEvent.SHIFT_MASK));}});
 
                 this.addMenuListener(new MenuListener() {
                     @Override
                     public void menuSelected(MenuEvent e) {
+                        refresh();
+
                         JMenu file = menu.getMenu(0);
 
                         file.getItem(2).setEnabled(openFileHandler != null && openFileHandler.getFile() != null);
@@ -109,19 +181,25 @@ public class JFrameSHCMDataEditor extends JFrame {
                 }));
             }});
         }
+
+        refresh();
     }
 
-
+    public void refresh() {
+        this.setTitle("SHCMData Editor" + (openFileHandler == null ?"": " - " + openFileHandler.getText()));
+    }
 
     private class WindowEvents extends WindowAdapter {
         @Override
         public void windowClosing(WindowEvent e) {
-            //todo dont do this if saved
-            //int option = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "You can't just close the window!\nWhat do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Save", "Don't Save", "Back"}, "Back");
-            //if (option == 0 || option == 1) {
-                //todo
-                System.exit(0);
-            //}
+            if(openFileHandler != null && openFileHandler.changed) {
+                int optionSave = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "You can't just close the window!\nWhat do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Save", "Don't Save", "Back"}, "Save");
+                if(optionSave == 2)
+                    return;
+                if(optionSave == 0)
+                    openFileHandler.save();
+            }
+            System.exit(0);
         }
     }
 }
