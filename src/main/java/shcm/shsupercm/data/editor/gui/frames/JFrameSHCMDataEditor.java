@@ -2,6 +2,7 @@ package shcm.shsupercm.data.editor.gui.frames;
 
 import shcm.shsupercm.data.SHCMData;
 import shcm.shsupercm.data.editor.SHCMDataEditor;
+import shcm.shsupercm.data.editor.gui.Assets;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
 
@@ -18,11 +19,15 @@ import java.net.URISyntaxException;
 
 public class JFrameSHCMDataEditor extends JFrame {
     private OpenFileHandler openFileHandler;
+    private JTree valueTree;
 
     public JFrameSHCMDataEditor(OpenFileHandler openFileHandlerIN) throws HeadlessException {
         this.openFileHandler = openFileHandlerIN;
+        this.setIconImage(Assets.LOGO.getImage());
         this.setSize(750,660);
-        this.setResizable(false);
+        this.setMinimumSize(new Dimension(750, 660));
+        //this.setResizable(false);
+        this.setLayout(new BorderLayout());
         this.addWindowListener(new WindowEvents());
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         {
@@ -180,6 +185,53 @@ public class JFrameSHCMDataEditor extends JFrame {
                     }
                 }));
             }});
+        }
+
+        {
+            JToolBar toolBar = new JToolBar();
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_NEW_DATABLOCK);
+                action.setToolTipText("Add new Data Block to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_NEW_DATAKEYEDBLOCK);
+                action.setToolTipText("Add new Data Keyed Block to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_NEW_ARRAY);
+                action.setToolTipText("Add new Arrays to the selected item.");
+            }
+
+            add(toolBar, BorderLayout.NORTH);
+        }
+
+        {
+            valueTree = new JTree();
+            JScrollPane scrollPane = new JScrollPane(valueTree);
+            scrollPane.setViewportView(valueTree);
+
+            add(scrollPane);
         }
 
         refresh();
