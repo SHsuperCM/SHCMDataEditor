@@ -3,6 +3,8 @@ package shcm.shsupercm.data.editor.gui.frames;
 import shcm.shsupercm.data.SHCMData;
 import shcm.shsupercm.data.editor.SHCMDataEditor;
 import shcm.shsupercm.data.editor.gui.Assets;
+import shcm.shsupercm.data.editor.gui.rendering.DataCellRenderer;
+import shcm.shsupercm.data.editor.management.DataEntry;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
 
@@ -10,6 +12,7 @@ import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -20,13 +23,13 @@ import java.net.URISyntaxException;
 public class JFrameSHCMDataEditor extends JFrame {
     private OpenFileHandler openFileHandler;
     private JTree valueTree;
+    private JToolBar toolBar;
 
     public JFrameSHCMDataEditor(OpenFileHandler openFileHandlerIN) throws HeadlessException {
         this.openFileHandler = openFileHandlerIN;
         this.setIconImage(Assets.LOGO.getImage());
-        this.setSize(750,660);
         this.setMinimumSize(new Dimension(750, 660));
-        //this.setResizable(false);
+        this.setSize(this.getMinimumSize());
         this.setLayout(new BorderLayout());
         this.addWindowListener(new WindowEvents());
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -188,7 +191,9 @@ public class JFrameSHCMDataEditor extends JFrame {
         }
 
         {
-            JToolBar toolBar = new JToolBar();
+            toolBar = new JToolBar();
+
+            toolBar.setRequestFocusEnabled(false);
 
             {
                 JButton action = toolBar.add(new AbstractAction() {
@@ -197,8 +202,8 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_NEW_DATABLOCK);
-                action.setToolTipText("Add new Data Block to the selected item.");
+                action.setIcon(Assets.ICON_DATABLOCK);
+                action.setToolTipText("Add a new Data Block to the selected item.");
             }
 
             {
@@ -208,8 +213,8 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_NEW_DATAKEYEDBLOCK);
-                action.setToolTipText("Add new Data Keyed Block to the selected item.");
+                action.setIcon(Assets.ICON_DATAKEYEDBLOCK);
+                action.setToolTipText("Add a new Data Keyed Block to the selected item.");
             }
 
             {
@@ -219,8 +224,113 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_NEW_ARRAY);
-                action.setToolTipText("Add new Arrays to the selected item.");
+                action.setIcon(Assets.ICON_ARRAY);
+                action.setToolTipText("Add a new Array to the selected item.");
+            }
+
+            toolBar.addSeparator();
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_BOOLEAN);
+                action.setToolTipText("Add a new Boolean to the selected item.");
+            }
+
+            toolBar.addSeparator();
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_STRING);
+                action.setToolTipText("Add a new String to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_CHARACTER);
+                action.setToolTipText("Add a new Character to the selected item.");
+            }
+
+            toolBar.addSeparator();
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_INTEGER);
+                action.setToolTipText("Add a new Integer to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_BYTE);
+                action.setToolTipText("Add a new Byte to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_FLOAT);
+                action.setToolTipText("Add a new Float to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_DOUBLE);
+                action.setToolTipText("Add a new Double to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_LONG);
+                action.setToolTipText("Add a new Long to the selected item.");
+            }
+
+            {
+                JButton action = toolBar.add(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
+                action.setIcon(Assets.ICON_SHORT);
+                action.setToolTipText("Add a new Short to the selected item.");
             }
 
             add(toolBar, BorderLayout.NORTH);
@@ -231,17 +341,35 @@ public class JFrameSHCMDataEditor extends JFrame {
             JScrollPane scrollPane = new JScrollPane(valueTree);
             scrollPane.setViewportView(valueTree);
 
+            valueTree.setCellRenderer(new DataCellRenderer());
+
             add(scrollPane);
+            scrollPane.requestFocus();
         }
 
         refresh();
     }
 
     public void refresh() {
-        this.setTitle("SHCMData Editor" + (openFileHandler == null ?"": " - " + openFileHandler.getText()));
+        if(openFileHandler == null) {
+            this.setTitle("SHCMData Editor");
+            for (Component component : this.toolBar.getComponents()) component.setEnabled(false);
+            this.valueTree.setEnabled(false);
+            this.valueTree.setModel(null);
+        } else {
+            this.setTitle("SHCMData Editor - " + openFileHandler.getText() + (openFileHandler.changed ? " *" : ""));
+            for (Component component : this.toolBar.getComponents()) component.setEnabled(true);
+            this.valueTree.setEnabled(true);
+            this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, null, openFileHandler.data), true));
+        }
     }
 
     private class WindowEvents extends WindowAdapter {
+        @Override
+        public void windowOpened(WindowEvent e) {
+            requestFocus();
+        }
+
         @Override
         public void windowClosing(WindowEvent e) {
             if(openFileHandler != null && openFileHandler.changed) {

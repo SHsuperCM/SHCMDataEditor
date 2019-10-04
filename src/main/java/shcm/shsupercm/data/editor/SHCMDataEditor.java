@@ -6,15 +6,17 @@ import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.net.URL;
 
 public class SHCMDataEditor {
-
     public static final String version = "0.1";
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        ToolTipManager.sharedInstance().setInitialDelay(0);
+        UIManager.put("ToolTip.background", Color.WHITE);
 
         OpenFileHandler openFileHandler = null;
 
