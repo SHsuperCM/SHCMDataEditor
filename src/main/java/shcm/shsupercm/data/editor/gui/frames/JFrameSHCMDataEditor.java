@@ -3,7 +3,7 @@ package shcm.shsupercm.data.editor.gui.frames;
 import shcm.shsupercm.data.SHCMData;
 import shcm.shsupercm.data.editor.SHCMDataEditor;
 import shcm.shsupercm.data.editor.gui.Assets;
-import shcm.shsupercm.data.editor.gui.rendering.DataCellRenderer;
+import shcm.shsupercm.data.editor.gui.graphics.DataCellRenderer;
 import shcm.shsupercm.data.editor.management.DataEntry;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
@@ -11,6 +11,8 @@ import shcm.shsupercm.data.framework.DataBlock;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.*;
 import java.awt.*;
@@ -151,7 +153,7 @@ public class JFrameSHCMDataEditor extends JFrame {
                 this.addMenuListener(new MenuListener() {
                     @Override
                     public void menuSelected(MenuEvent e) {
-                        refresh();
+                        //refresh();
 
                         JMenu file = menu.getMenu(0);
 
@@ -338,6 +340,14 @@ public class JFrameSHCMDataEditor extends JFrame {
 
         {
             valueTree = new JTree();
+            valueTree.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int row = valueTree.getRowForLocation(e.getX(),e.getY());
+                    if(row == -1)
+                        valueTree.clearSelection();
+                }
+            });
             JScrollPane scrollPane = new JScrollPane(valueTree);
             scrollPane.setViewportView(valueTree);
 
@@ -349,7 +359,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
         refresh();
     }
-
+    //todo disable tray tools if no storage block/array is selected
     public void refresh() {
         if(openFileHandler == null) {
             this.setTitle("SHCMData Editor");
@@ -360,7 +370,7 @@ public class JFrameSHCMDataEditor extends JFrame {
             this.setTitle("SHCMData Editor - " + openFileHandler.getText() + (openFileHandler.changed ? " *" : ""));
             for (Component component : this.toolBar.getComponents()) component.setEnabled(true);
             this.valueTree.setEnabled(true);
-            this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, null, openFileHandler.data), true));
+            this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, openFileHandler.getText(), openFileHandler.data), true));
         }
     }
 

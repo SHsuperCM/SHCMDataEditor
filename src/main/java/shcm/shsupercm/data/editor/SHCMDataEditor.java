@@ -4,6 +4,7 @@ import shcm.shsupercm.data.editor.gui.Assets;
 import shcm.shsupercm.data.editor.gui.frames.JFrameSHCMDataEditor;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
+import shcm.shsupercm.data.framework.DataKeyedBlock;
 
 import javax.swing.*;
 import java.awt.*;
