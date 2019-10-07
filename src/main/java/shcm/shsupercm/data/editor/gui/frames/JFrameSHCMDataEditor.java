@@ -9,10 +9,7 @@ import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
+import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.*;
 import java.awt.*;
@@ -189,6 +186,16 @@ public class JFrameSHCMDataEditor extends JFrame {
                         }
                     }
                 }));
+                this.add(new JMenuItem(new AbstractAction("SHCMData Format") {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                            try {
+                                Desktop.getDesktop().browse(new URI("https://github.com/SHsuperCM/SHCMData/wiki/Data-Format"));
+                            } catch (IOException | URISyntaxException ignored) {}
+                        }
+                    }
+                }));
             }});
         }
 
@@ -340,6 +347,29 @@ public class JFrameSHCMDataEditor extends JFrame {
 
         {
             valueTree = new JTree();
+
+            valueTree.addTreeSelectionListener(e -> {
+                boolean canAddItems = valueTree.getSelectionCount() == 1;
+                if(canAddItems) {
+                    try {
+                        Object value = ((DataEntry) ((DefaultMutableTreeNode) valueTree.getLastSelectedPathComponent()).getUserObject()).value;
+                        canAddItems = !(
+                                value instanceof String ||
+                                value instanceof Boolean ||
+                                value instanceof Byte ||
+                                value instanceof Short ||
+                                value instanceof Character ||
+                                value instanceof Integer ||
+                                value instanceof Float ||
+                                value instanceof Long ||
+                                value instanceof Double);
+                    } catch (Exception ignored) {
+                        canAddItems = false;
+                    }
+                }
+                for (Component component : toolBar.getComponents()) component.setEnabled(canAddItems);
+            });
+
             valueTree.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -360,7 +390,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
         refresh();
     }
-    //todo disable tray tools if no storage block/array is selected
+
     public void refresh() {
         if(openFileHandler == null) {
             this.setTitle("SHCMData Editor");
@@ -369,7 +399,7 @@ public class JFrameSHCMDataEditor extends JFrame {
             this.valueTree.setModel(null);
         } else {
             this.setTitle("SHCMData Editor - " + openFileHandler.getText() + (openFileHandler.changed ? " *" : ""));
-            for (Component component : this.toolBar.getComponents()) component.setEnabled(true);
+            for (Component component : this.toolBar.getComponents()) component.setEnabled(false);
             this.valueTree.setEnabled(true);
             this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, openFileHandler.getText(), openFileHandler.data), true));
         }
