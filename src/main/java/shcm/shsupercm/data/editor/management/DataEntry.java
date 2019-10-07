@@ -7,6 +7,8 @@ import shcm.shsupercm.data.utils.DataStringConversion;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -18,7 +20,8 @@ public class DataEntry {
 
     public final String keyString;
     public final String valueString;
-    public final DataIcon[] dataIcons;
+    public final DataIcon dataIcon1;
+    public final DataIcon dataIcon2;
     public final boolean canHaveChildren;
 
     DataEntry(DataEntry parent, Object key, Object value) {
@@ -37,19 +40,17 @@ public class DataEntry {
                 this.value instanceof Long ||
                 this.value instanceof Double);
 
-        this.keyString = key == null ? "" : DataStringConversion.toString(key);
+        this.keyString = key == null ? "" : ((parent != null && parent.value != null && parent.value.getClass().isArray()) ? key.toString() : DataStringConversion.toString(key));
         this.valueString = DataStringConversion.toString(value);
 
-        ArrayList<DataIcon> dataIcons = new ArrayList<>();
+        dataIcon1 = DataIcon.getFor(value.getClass());
 
-        dataIcons.add(DataIcon.getFor(value.getClass()));
-
-        if(value.getClass().isArray()) {
-            dataIcons.add(DataIcon.getFor(value.getClass().getComponentType()));
-        } else if(value instanceof DataKeyedBlock && ((DataKeyedBlock)value).keyType != null)
-            dataIcons.add(DataIcon.getFor(((DataKeyedBlock)value).keyType));
-
-        this.dataIcons = dataIcons.toArray(new DataIcon[0]);
+        if(value.getClass().isArray())
+            dataIcon2 = DataIcon.getFor(value.getClass().getComponentType());
+        else if(value instanceof DataKeyedBlock && ((DataKeyedBlock)value).keyType != null)
+            dataIcon2 = DataIcon.getFor(((DataKeyedBlock)value).keyType);
+        else
+            dataIcon2 = null;
     }
 
     public static DefaultMutableTreeNode read(DataEntry parent, Object key, Object value) {
@@ -111,6 +112,22 @@ public class DataEntry {
                 return LONG;
             if(value == Double.class)
                 return DOUBLE;
+            if(value == boolean.class)
+                return BOOLEAN;
+            if(value == byte.class)
+                return BYTE;
+            if(value == short.class)
+                return SHORT;
+            if(value == char.class)
+                return CHARACTER;
+            if(value == int.class)
+                return INTEGER;
+            if(value == float.class)
+                return FLOAT;
+            if(value == long.class)
+                return LONG;
+            if(value == double.class)
+                return DOUBLE;
 
             if(value.isArray())
                 return ARRAY;
@@ -122,15 +139,10 @@ public class DataEntry {
             return null;
         }
 
-        public ImageIcon icon;
+        public final ImageIcon icon;
 
         DataIcon(ImageIcon icon) {
             this.icon = icon;
         }
-    }
-
-    @Override
-    public String toString() {
-        return keyString + ": " + valueString;
     }
 }

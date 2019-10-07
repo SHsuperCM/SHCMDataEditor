@@ -348,6 +348,7 @@ public class JFrameSHCMDataEditor extends JFrame {
                         valueTree.clearSelection();
                 }
             });
+
             JScrollPane scrollPane = new JScrollPane(valueTree);
             scrollPane.setViewportView(valueTree);
 

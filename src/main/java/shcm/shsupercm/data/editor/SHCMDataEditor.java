@@ -16,7 +16,7 @@ public class SHCMDataEditor {
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setInitialDelay(200);
         UIManager.put("ToolTip.background", Color.WHITE);
 
         OpenFileHandler openFileHandler = null;
