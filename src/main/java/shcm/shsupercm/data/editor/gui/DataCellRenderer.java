@@ -1,4 +1,4 @@
-package shcm.shsupercm.data.editor.gui.graphics;
+package shcm.shsupercm.data.editor.gui;
 
 import shcm.shsupercm.data.editor.management.DataEntry;
 

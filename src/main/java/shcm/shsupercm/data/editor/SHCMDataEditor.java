@@ -1,15 +1,12 @@
 package shcm.shsupercm.data.editor;
 
-import shcm.shsupercm.data.editor.gui.Assets;
-import shcm.shsupercm.data.editor.gui.frames.JFrameSHCMDataEditor;
+import shcm.shsupercm.data.editor.gui.JFrameSHCMDataEditor;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
-import shcm.shsupercm.data.framework.DataKeyedBlock;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.net.URL;
 
 public class SHCMDataEditor {
     public static final String version = "0.1";

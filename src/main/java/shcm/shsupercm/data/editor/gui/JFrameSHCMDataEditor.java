@@ -1,9 +1,7 @@
-package shcm.shsupercm.data.editor.gui.frames;
+package shcm.shsupercm.data.editor.gui;
 
 import shcm.shsupercm.data.SHCMData;
 import shcm.shsupercm.data.editor.SHCMDataEditor;
-import shcm.shsupercm.data.editor.gui.Assets;
-import shcm.shsupercm.data.editor.gui.graphics.DataCellRenderer;
 import shcm.shsupercm.data.editor.management.DataEntry;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
@@ -52,8 +50,25 @@ public class JFrameSHCMDataEditor extends JFrame {
                                     int optionSave = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "You can't just close the window!\nWhat do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Save", "Don't Save", "Back"}, "Save");
                                     if(optionSave == 2)
                                         return;
-                                    if(optionSave == 0)
-                                        openFileHandler.save();
+                                    if(optionSave == 0) {
+                                        if(!openFileHandler.save()) {
+                                            JFileChooser saveDialog = new JFileChooser();
+
+                                            saveDialog.setDialogType(JFileChooser.SAVE_DIALOG);
+                                            saveDialog.setSelectedFile(new File("file.shcmd"));
+                                            saveDialog.setFileFilter(new FileNameExtensionFilter("SHCMData File", "shcmd"));
+
+                                            if(saveDialog.showSaveDialog(JFrameSHCMDataEditor.this) == JFileChooser.APPROVE_OPTION) {
+                                                if(saveDialog.getSelectedFile().exists()) {
+                                                    if (JOptionPane.showConfirmDialog(null, "Do you want to replace the existing file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
+                                                        this.actionPerformed(e);
+                                                        return;
+                                                    }
+                                                }
+                                                openFileHandler.saveAs(saveDialog.getSelectedFile());
+                                            }
+                                        }
+                                    }
                                 }
                                 openFileHandler = new OpenFileHandler(new DataBlock());
                             }
@@ -88,8 +103,25 @@ public class JFrameSHCMDataEditor extends JFrame {
                                         int optionSave = JOptionPane.showOptionDialog(JFrameSHCMDataEditor.this, "You can't just close this file!!\nWhat do I do?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[]{"Save", "Don't Save", "Back"}, "Save");
                                         if(optionSave == 2)
                                             return;
-                                        if(optionSave == 0)
-                                            openFileHandler.save();
+                                        if(optionSave == 0) {
+                                            if(!openFileHandler.save()) {
+                                                JFileChooser saveDialog = new JFileChooser();
+
+                                                saveDialog.setDialogType(JFileChooser.SAVE_DIALOG);
+                                                saveDialog.setSelectedFile(new File("file.shcmd"));
+                                                saveDialog.setFileFilter(new FileNameExtensionFilter("SHCMData File", "shcmd"));
+
+                                                if(saveDialog.showSaveDialog(JFrameSHCMDataEditor.this) == JFileChooser.APPROVE_OPTION) {
+                                                    if(saveDialog.getSelectedFile().exists()) {
+                                                        if (JOptionPane.showConfirmDialog(null, "Do you want to replace the existing file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
+                                                            this.actionPerformed(e);
+                                                            return;
+                                                        }
+                                                    }
+                                                    openFileHandler.saveAs(saveDialog.getSelectedFile());
+                                                }
+                                            }
+                                        }
                                     }
                                     openFileHandler = new OpenFileHandler(openDialog.getSelectedFile());
                                 }
