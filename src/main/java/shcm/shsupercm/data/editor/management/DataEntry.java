@@ -7,13 +7,10 @@ import shcm.shsupercm.data.utils.DataStringConversion;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 
-
-public class DataEntry {
+public class DataEntry extends DefaultMutableTreeNode{
+    public final String fullPath;
     public final DataEntry parent;
     public final Object key;
     public final Object value;
@@ -51,29 +48,37 @@ public class DataEntry {
             dataIcon2 = DataIcon.getFor(((DataKeyedBlock)value).keyType);
         else
             dataIcon2 = null;
+
+        StringBuilder fullPath = new StringBuilder(keyString);
+        DataEntry p = parent;
+
+        while(p != null) {
+            fullPath.insert(0, p.keyString + '.');
+            p = p.parent;
+        }
+
+        this.fullPath = fullPath.toString();
     }
 
-    public static DefaultMutableTreeNode read(DataEntry parent, Object key, Object value) {
+    @Override
+    public boolean getAllowsChildren() {
+        return this.canHaveChildren;
+    }
+
+    //Constructs but also reads recursively children nodes
+    public static DataEntry read(DataEntry parent, Object key, Object value) {
         if(value == null)
             return null;
 
-        DataEntry nodeEntry = new DataEntry(parent, key, value);
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeEntry) {
-            @Override
-            public boolean getAllowsChildren() {
-                if(!(userObject instanceof DataEntry))
-                    return false;
-                return ((DataEntry) userObject).canHaveChildren;
-            }
-        };
+        DataEntry node = new DataEntry(parent, key, value);
 
         if(value.getClass().isArray()) {
             for (int i = 0; i < Array.getLength(value); i++)
-                node.add(read(nodeEntry, i, Array.get(value, i)));
+                node.add(read(node, i, Array.get(value, i)));
         } else if(value instanceof DataKeyedBlock) {
             for (Object subKey : ((DataKeyedBlock) value).getKeys())
                 //noinspection unchecked
-                node.add(read(nodeEntry, subKey, ((DataKeyedBlock) value).get(subKey)));
+                node.add(read(node, subKey, ((DataKeyedBlock) value).get(subKey)));
         }
 
         return node;

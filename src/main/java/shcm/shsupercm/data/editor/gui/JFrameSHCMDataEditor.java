@@ -384,7 +384,7 @@ public class JFrameSHCMDataEditor extends JFrame {
                 boolean canAddItems = valueTree.getSelectionCount() == 1;
                 if(canAddItems) {
                     try {
-                        Object value = ((DataEntry) ((DefaultMutableTreeNode) valueTree.getLastSelectedPathComponent()).getUserObject()).value;
+                        Object value = ((DataEntry) valueTree.getLastSelectedPathComponent()).value;
                         canAddItems = !(
                                 value instanceof String ||
                                 value instanceof Boolean ||
