@@ -1,6 +1,7 @@
 package shcm.shsupercm.data.editor.management;
 
 import shcm.shsupercm.data.editor.gui.Assets;
+import shcm.shsupercm.data.editor.gui.JFrameSHCMDataEditor;
 import shcm.shsupercm.data.framework.DataBlock;
 import shcm.shsupercm.data.framework.DataKeyedBlock;
 import shcm.shsupercm.data.utils.DataStringConversion;
@@ -9,22 +10,24 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.lang.reflect.Array;
 
-public class DataEntry extends DefaultMutableTreeNode{
-    public final String fullPath;
-    public final DataEntry parent;
-    public final Object key;
-    public final Object value;
+public class DataEntry extends DefaultMutableTreeNode {
+    public String fullPath;
+    public DataEntry parent;
+    public Object key;
+    public Object value;
 
-    public final String keyString;
-    public final String valueString;
-    public final DataIcon dataIcon1;
-    public final DataIcon dataIcon2;
+    public String keyString;
+    public String valueString;
+
+    public final DataIcon dataIconType;
+    public final DataIcon dataIconSubType;
     public final boolean canHaveChildren;
 
     DataEntry(DataEntry parent, Object key, Object value) {
         this.parent = parent;
         this.key = key;
         this.value = value;
+
 
         this.canHaveChildren = !(
                 this.value instanceof String ||
@@ -40,14 +43,14 @@ public class DataEntry extends DefaultMutableTreeNode{
         this.keyString = key == null ? "" : ((parent != null && parent.value != null && parent.value.getClass().isArray()) ? key.toString() : DataStringConversion.toString(key));
         this.valueString = DataStringConversion.toString(value);
 
-        dataIcon1 = DataIcon.getFor(value.getClass());
+        dataIconType = DataIcon.getFor(value.getClass());
 
         if(value.getClass().isArray())
-            dataIcon2 = DataIcon.getFor(value.getClass().getComponentType());
+            dataIconSubType = DataIcon.getFor(value.getClass().getComponentType());
         else if(value instanceof DataKeyedBlock && ((DataKeyedBlock)value).keyType != null)
-            dataIcon2 = DataIcon.getFor(((DataKeyedBlock)value).keyType);
+            dataIconSubType = DataIcon.getFor(((DataKeyedBlock)value).keyType);
         else
-            dataIcon2 = null;
+            dataIconSubType = null;
 
         StringBuilder fullPath = new StringBuilder(keyString);
         DataEntry p = parent;
@@ -66,7 +69,7 @@ public class DataEntry extends DefaultMutableTreeNode{
     }
 
     //Constructs but also reads recursively children nodes
-    public static DataEntry read(DataEntry parent, Object key, Object value) {
+    public static DataEntry read(DataEntry parent, Object key, Object value, JFrameSHCMDataEditor frame) {
         if(value == null)
             return null;
 
@@ -74,14 +77,56 @@ public class DataEntry extends DefaultMutableTreeNode{
 
         if(value.getClass().isArray()) {
             for (int i = 0; i < Array.getLength(value); i++)
-                node.add(read(node, i, Array.get(value, i)));
+                node.add(read(node, i, Array.get(value, i), frame));
         } else if(value instanceof DataKeyedBlock) {
             for (Object subKey : ((DataKeyedBlock) value).getKeys())
                 //noinspection unchecked
-                node.add(read(node, subKey, ((DataKeyedBlock) value).get(subKey)));
+                node.add(read(node, subKey, ((DataKeyedBlock) value).get(subKey), frame));
         }
 
         return node;
+    }
+
+
+    public void delete() {
+        if(parent == null) return;
+        if(parent.value instanceof DataKeyedBlock) {//noinspection unchecked
+            ((DataKeyedBlock) parent.value).remove(key);
+        } else if(parent.value.getClass().isArray()) {
+            int originalLength = Array.getLength(parent.value);
+            Object newArray = Array.newInstance(parent.value.getClass().getComponentType(), originalLength - 1);
+
+            for (int i = 0; i < originalLength; i++) {
+                DataEntry childAtI = (DataEntry) parent.getChildAt(i);
+
+                if(i < (Integer)key) {
+                    Array.set(newArray, i, childAtI.value);
+                } else if(i > (Integer)key) {
+                    Array.set(newArray, i-1, childAtI.value);
+                }
+            }
+
+            parent.setValue(newArray);
+        }
+    }
+
+    private void setValue(Object newVal) {
+        if(parent == null)
+            return;
+        if(newVal == null)
+            delete();
+        else {
+            if (parent.value instanceof DataKeyedBlock) {
+                //noinspection unchecked
+                ((DataKeyedBlock) parent.value).set(key, newVal);
+            } else if (parent.value.getClass().isArray()) {
+                Array.set(parent, (Integer) key, newVal);
+            }
+        }
+    }
+
+    private void setNewKey(Object newKey) {
+
     }
 
     public enum DataIcon {

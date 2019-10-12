@@ -16,10 +16,10 @@ public class DataCellRenderer implements TreeCellRenderer {
 
         item.setBackground(sel ? new Color(0x5E6EFF) : new Color(0x0FFFFFF, true));
 
-        if(dataEntry.dataIcon1 != null)
-            item.add(new JLabel(dataEntry.dataIcon1.icon));
-        if(dataEntry.dataIcon2 != null)
-            item.add(new JLabel(dataEntry.dataIcon2.icon));
+        if(dataEntry.dataIconType != null)
+            item.add(new JLabel(dataEntry.dataIconType.icon));
+        if(dataEntry.dataIconSubType != null)
+            item.add(new JLabel(dataEntry.dataIconSubType.icon));
         item.add(new JLabel(stringValue));
 
         return item;

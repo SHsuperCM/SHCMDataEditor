@@ -10,17 +10,21 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.*;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 
 public class JFrameSHCMDataEditor extends JFrame {
-    private OpenFileHandler openFileHandler;
-    private JTree valueTree;
-    private JToolBar toolBar;
+    public OpenFileHandler openFileHandler;
+    public JTree valueTree;
+    public JToolBar toolBar;
+
+    public HashSet<String> openedPaths = new HashSet<>();
 
     public JFrameSHCMDataEditor(OpenFileHandler openFileHandlerIN) throws HeadlessException {
         this.openFileHandler = openFileHandlerIN;
@@ -34,7 +38,8 @@ public class JFrameSHCMDataEditor extends JFrame {
             JMenuBar menu = new JMenuBar();
             this.setJMenuBar(menu);
             menu.add(new JMenu("File") {{
-                this.add(new JMenuItem(new AbstractAction("New") {
+                JMenuItem itemNew;
+                this.add(itemNew = new JMenuItem(new AbstractAction("New") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(openFileHandler != null) {
@@ -57,8 +62,11 @@ public class JFrameSHCMDataEditor extends JFrame {
                                             saveDialog.setDialogType(JFileChooser.SAVE_DIALOG);
                                             saveDialog.setSelectedFile(new File("file.shcmd"));
                                             saveDialog.setFileFilter(new FileNameExtensionFilter("SHCMData File", "shcmd"));
+                                            saveDialog.setMultiSelectionEnabled(false);
 
                                             if(saveDialog.showSaveDialog(JFrameSHCMDataEditor.this) == JFileChooser.APPROVE_OPTION) {
+                                                if(saveDialog.getSelectedFile().getName().contains("."))
+                                                    saveDialog.setSelectedFile(new File(saveDialog.getSelectedFile().getAbsolutePath() + ".shcmd"));
                                                 if(saveDialog.getSelectedFile().exists()) {
                                                     if (JOptionPane.showConfirmDialog(null, "Do you want to replace the existing file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
                                                         this.actionPerformed(e);
@@ -78,7 +86,8 @@ public class JFrameSHCMDataEditor extends JFrame {
                         refresh();
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('N', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
-                this.add(new JMenuItem(new AbstractAction("Open") {
+                JMenuItem itemOpen;
+                this.add(itemOpen = new JMenuItem(new AbstractAction("Open") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         JFileChooser openDialog = new JFileChooser();
@@ -110,8 +119,11 @@ public class JFrameSHCMDataEditor extends JFrame {
                                                 saveDialog.setDialogType(JFileChooser.SAVE_DIALOG);
                                                 saveDialog.setSelectedFile(new File("file.shcmd"));
                                                 saveDialog.setFileFilter(new FileNameExtensionFilter("SHCMData File", "shcmd"));
+                                                saveDialog.setMultiSelectionEnabled(false);
 
                                                 if(saveDialog.showSaveDialog(JFrameSHCMDataEditor.this) == JFileChooser.APPROVE_OPTION) {
+                                                    if(saveDialog.getSelectedFile().getName().contains("."))
+                                                        saveDialog.setSelectedFile(new File(saveDialog.getSelectedFile().getAbsolutePath() + ".shcmd"));
                                                     if(saveDialog.getSelectedFile().exists()) {
                                                         if (JOptionPane.showConfirmDialog(null, "Do you want to replace the existing file?", "SHCMData Editor - Idiot Proof Protocol", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
                                                             this.actionPerformed(e);
@@ -133,7 +145,8 @@ public class JFrameSHCMDataEditor extends JFrame {
                         refresh();
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('O', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
-                this.add(new JMenuItem(new AbstractAction("Reload") {
+                JMenuItem itemReload;
+                this.add(itemReload = new JMenuItem(new AbstractAction("Reload") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(openFileHandler != null) {
@@ -142,7 +155,8 @@ public class JFrameSHCMDataEditor extends JFrame {
                         }
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('R', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
-                this.add(new JMenuItem(new AbstractAction("Save") {
+                JMenuItem itemSave;
+                this.add(itemSave = new JMenuItem(new AbstractAction("Save") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(openFileHandler != null) {
@@ -155,7 +169,8 @@ public class JFrameSHCMDataEditor extends JFrame {
                         }
                     }
                 }) {{setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));}});
-                this.add(new JMenuItem(new AbstractAction("Save As") {
+                JMenuItem itemSaveAs;
+                this.add(itemSaveAs = new JMenuItem(new AbstractAction("Save As") {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if(openFileHandler != null) {
@@ -182,13 +197,9 @@ public class JFrameSHCMDataEditor extends JFrame {
                 this.addMenuListener(new MenuListener() {
                     @Override
                     public void menuSelected(MenuEvent e) {
-                        //refresh();
-
-                        JMenu file = menu.getMenu(0);
-
-                        file.getItem(2).setEnabled(openFileHandler != null && openFileHandler.getFile() != null);
-                        file.getItem(3).setEnabled(openFileHandler != null);
-                        file.getItem(4).setEnabled(openFileHandler != null);
+                        itemReload.setEnabled(openFileHandler != null && openFileHandler.getFile() != null);
+                        itemSave.setEnabled(openFileHandler != null);
+                        itemSaveAs.setEnabled(openFileHandler != null);
                     }
 
                     @Override
@@ -196,6 +207,27 @@ public class JFrameSHCMDataEditor extends JFrame {
                     @Override
                     public void menuCanceled(MenuEvent e) {}
                 });
+            }});
+            menu.add(new JMenu("Edit") {{
+                this.add(new JMenuItem(new AbstractAction("Delete") {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if(openFileHandler != null && valueTree != null) {
+                            TreePath[] selectionPaths = valueTree.getSelectionPaths();
+                            if(selectionPaths != null) {
+                                for (TreePath selectedTreePath : selectionPaths) {
+                                    DataEntry dataEntry = (DataEntry) selectedTreePath.getLastPathComponent();
+                                    if(dataEntry != null)
+                                        dataEntry.delete();
+                                }
+
+
+                                openFileHandler.changed = true;
+                                refresh();
+                            }
+                        }
+                    }
+                }) {{setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));}});
             }});
             menu.add(new JMenu("About") {{
                 this.add(new JMenuItem(new AbstractAction("SHCMData library version: V" + SHCMData.versionName) {
@@ -408,11 +440,48 @@ public class JFrameSHCMDataEditor extends JFrame {
                     int row = valueTree.getRowForLocation(e.getX(),e.getY());
                     if(row == -1)
                         valueTree.clearSelection();
+                    else if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                        valueTree.setSelectionRow(row);
+                        new EditEntryDialog(JFrameSHCMDataEditor.this, (DataEntry) valueTree.getPathForRow(row).getLastPathComponent()).setVisible(true);
+                    } else if(SwingUtilities.isRightMouseButton(e)) {
+                        DataEntry dataEntry = (DataEntry) valueTree.getPathForRow(row).getLastPathComponent();
+                        valueTree.setSelectionRow(row);
+                        if(dataEntry.parent != null) {
+                            new JPopupMenu() {{
+                                add(new JMenuItem(new AbstractAction("Edit") {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        new EditEntryDialog(JFrameSHCMDataEditor.this, dataEntry).setVisible(true);
+                                    }
+                                }));
+                                add(new JMenuItem(new AbstractAction("Delete") {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        dataEntry.delete();
+                                        openFileHandler.changed = true;
+                                        refresh();
+                                    }
+                                }));
+                            }}.show(e.getComponent(), e.getX(), e.getY());
+                        }
+                    }
                 }
             });
 
             JScrollPane scrollPane = new JScrollPane(valueTree);
             scrollPane.setViewportView(valueTree);
+
+            valueTree.addTreeExpansionListener(new TreeExpansionListener() {
+                @Override
+                public void treeExpanded(TreeExpansionEvent event) {
+                    openedPaths.add(((DataEntry)event.getPath().getLastPathComponent()).fullPath);
+                }
+
+                @Override
+                public void treeCollapsed(TreeExpansionEvent event) {
+                    openedPaths.remove(((DataEntry)event.getPath().getLastPathComponent()).fullPath);
+                }
+            });
 
             valueTree.setCellRenderer(new DataCellRenderer());
 
@@ -428,13 +497,28 @@ public class JFrameSHCMDataEditor extends JFrame {
             this.setTitle("SHCMData Editor");
             for (Component component : this.toolBar.getComponents()) component.setEnabled(false);
             this.valueTree.setEnabled(false);
+            this.openedPaths.clear();
             this.valueTree.setModel(null);
         } else {
             this.setTitle("SHCMData Editor - " + openFileHandler.getText() + (openFileHandler.changed ? " *" : ""));
             for (Component component : this.toolBar.getComponents()) component.setEnabled(false);
             this.valueTree.setEnabled(true);
-            this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, openFileHandler.getText(), openFileHandler.data), true));
+
+            this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, openFileHandler.getText(), openFileHandler.data, this), true));
+
+            this.openedPaths.add(((DataEntry) this.valueTree.getModel().getRoot()).fullPath);
+
+            this.expandPreviouslyExpanded((DataEntry) this.valueTree.getModel().getRoot());
         }
+    }
+
+    private void expandPreviouslyExpanded(DataEntry dataEntry) {
+        if(!this.openedPaths.contains(dataEntry.fullPath))
+            return;
+
+        this.valueTree.expandPath(new TreePath(dataEntry.getPath()));
+        for (int i = 0; i < dataEntry.getChildCount(); i++)
+            expandPreviouslyExpanded((DataEntry) dataEntry.getChildAt(i));
     }
 
     private class WindowEvents extends WindowAdapter {
