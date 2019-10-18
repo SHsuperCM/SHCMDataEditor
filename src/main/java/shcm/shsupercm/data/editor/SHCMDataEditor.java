@@ -9,7 +9,7 @@ import java.awt.*;
 import java.io.File;
 
 public class SHCMDataEditor {
-    public static final String version = "0.1";
+    public static final String version = "0.2";
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -18,12 +18,12 @@ public class SHCMDataEditor {
 
         OpenFileHandler openFileHandler = null;
 
-        if(args.length > 0) {
-            if(args[0].equals("New"))
+        if (args.length > 0) {
+            if (args[0].equals("New"))
                 openFileHandler = new OpenFileHandler(new DataBlock());
             else {
                 File file = new File(args[0]);
-                if(file.exists())
+                if (file.exists())
                     openFileHandler = new OpenFileHandler(file);
             }
         }

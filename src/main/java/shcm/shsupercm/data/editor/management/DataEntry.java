@@ -2,11 +2,9 @@ package shcm.shsupercm.data.editor.management;
 
 import shcm.shsupercm.data.editor.gui.Assets;
 import shcm.shsupercm.data.editor.gui.JFrameSHCMDataEditor;
-import shcm.shsupercm.data.framework.DataBlock;
 import shcm.shsupercm.data.framework.DataKeyedBlock;
 import shcm.shsupercm.data.utils.DataStringConversion;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.lang.reflect.Array;
 
@@ -19,8 +17,8 @@ public class DataEntry extends DefaultMutableTreeNode {
     public String keyString;
     public String valueString;
 
-    public final DataIcon dataIconType;
-    public final DataIcon dataIconSubType;
+    public final Assets.DataIcon dataIconType;
+    public final Assets.DataIcon dataIconSubType;
     public final boolean canHaveChildren;
 
     DataEntry(DataEntry parent, Object key, Object value) {
@@ -43,12 +41,12 @@ public class DataEntry extends DefaultMutableTreeNode {
         this.keyString = key == null ? "" : ((parent != null && parent.value != null && parent.value.getClass().isArray()) ? key.toString() : DataStringConversion.toString(key));
         this.valueString = DataStringConversion.toString(value);
 
-        dataIconType = DataIcon.getFor(value.getClass());
+        dataIconType = Assets.DataIcon.getFor(value.getClass());
 
         if(value.getClass().isArray())
-            dataIconSubType = DataIcon.getFor(value.getClass().getComponentType());
+            dataIconSubType = Assets.DataIcon.getFor(value.getClass().getComponentType());
         else if(value instanceof DataKeyedBlock && ((DataKeyedBlock)value).keyType != null)
-            dataIconSubType = DataIcon.getFor(((DataKeyedBlock)value).keyType);
+            dataIconSubType = Assets.DataIcon.getFor(((DataKeyedBlock)value).keyType);
         else
             dataIconSubType = null;
 
@@ -68,7 +66,7 @@ public class DataEntry extends DefaultMutableTreeNode {
         return this.canHaveChildren;
     }
 
-    //Constructs but also reads recursively children nodes
+    //Constructs but also reads children nodes recursively
     public static DataEntry read(DataEntry parent, Object key, Object value, JFrameSHCMDataEditor frame) {
         if(value == null)
             return null;
@@ -110,89 +108,70 @@ public class DataEntry extends DefaultMutableTreeNode {
         }
     }
 
-    private void setValue(Object newVal) {
+    @SuppressWarnings("unchecked")
+    public void setValue(Object newVal) {
         if(parent == null)
             return;
         if(newVal == null)
             delete();
         else {
             if (parent.value instanceof DataKeyedBlock) {
-                //noinspection unchecked
                 ((DataKeyedBlock) parent.value).set(key, newVal);
             } else if (parent.value.getClass().isArray()) {
                 Array.set(parent, (Integer) key, newVal);
             }
         }
+        this.value = newVal;
     }
 
-    private void setNewKey(Object newKey) {
+    @SuppressWarnings("unchecked")
+    public void setNewKey(Object newKey) {
+        if(parent == null || newKey == null)
+            return;
 
-    }
-
-    public enum DataIcon {
-        DATAKEYEDBLOCK(Assets.ICON_DATAKEYEDBLOCK),
-        DATABLOCK(Assets.ICON_DATABLOCK),
-        ARRAY(Assets.ICON_ARRAY),
-        BOOLEAN(Assets.ICON_BOOLEAN),
-        STRING(Assets.ICON_STRING),
-        CHARACTER(Assets.ICON_CHARACTER),
-        BYTE(Assets.ICON_BYTE),
-        SHORT(Assets.ICON_SHORT),
-        INTEGER(Assets.ICON_INTEGER),
-        FLOAT(Assets.ICON_FLOAT),
-        DOUBLE(Assets.ICON_DOUBLE),
-        LONG(Assets.ICON_LONG);
-
-        public static DataIcon getFor(Class<?> value) {
-            if(value == String.class)
-                return STRING;
-            if(value == Boolean.class)
-                return BOOLEAN;
-            if(value == Byte.class)
-                return BYTE;
-            if(value == Short.class)
-                return SHORT;
-            if(value == Character.class)
-                return CHARACTER;
-            if(value == Integer.class)
-                return INTEGER;
-            if(value == Float.class)
-                return FLOAT;
-            if(value == Long.class)
-                return LONG;
-            if(value == Double.class)
-                return DOUBLE;
-            if(value == boolean.class)
-                return BOOLEAN;
-            if(value == byte.class)
-                return BYTE;
-            if(value == short.class)
-                return SHORT;
-            if(value == char.class)
-                return CHARACTER;
-            if(value == int.class)
-                return INTEGER;
-            if(value == float.class)
-                return FLOAT;
-            if(value == long.class)
-                return LONG;
-            if(value == double.class)
-                return DOUBLE;
-
-            if(value.isArray())
-                return ARRAY;
-            if(value == DataBlock.class)
-                return DATABLOCK;
-            if(value == DataKeyedBlock.class)
-                return DATAKEYEDBLOCK;
-
-            return null;
+        if (parent.value instanceof DataKeyedBlock) {
+            ((DataKeyedBlock) parent.value).set(newKey, this.value);
+            ((DataKeyedBlock) parent.value).remove(key);
+        } else if (parent.value.getClass().isArray()) {
+            MiscUtils.moveItemInArray(parent.value, (Integer)key, (Integer)newKey);
         }
+        this.key = newKey;
+    }
 
-        public final ImageIcon icon;
+    public void addChild(Object newKey, Object newVal) {
+        if(newKey == null || newVal == null)
+            return;
 
-        DataIcon(ImageIcon icon) {
-            this.icon = icon;
+        if (value instanceof DataKeyedBlock) {
+            if(!((DataKeyedBlock)value).isCorrectKeyType(newKey))
+                return;
+
+            //noinspection unchecked
+            ((DataKeyedBlock) value).set(newKey, newVal);
+        } else if (value.getClass().isArray()) {
+            if(!(newKey instanceof Integer))
+                return;
+
+            int originalLength = Array.getLength(value);
+            int index = (int) newKey;
+            if(index < 0)
+                index = originalLength;
+
+            Object newArray = Array.newInstance(value.getClass().getComponentType(), originalLength + 1);
+            boolean inserted = false;
+            for (int i = 0; i < originalLength + 1; i++) {
+                if(!inserted) {
+                    if(i == index) {
+                        Array.set(newArray, i, newVal);
+                        inserted = true;
+                    } else
+                        Array.set(newArray, i, Array.get(value, i));
+                } else
+                    Array.set(newArray, i, Array.get(value, i - 1));
+            }
+
+            setValue(newArray);
         }
     }
+
 }

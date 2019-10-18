@@ -275,7 +275,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_DATABLOCK);
+                action.setIcon(Assets.DataIcon.DATABLOCK.icon);
                 action.setToolTipText("Add a new Data Block to the selected item.");
             }
 
@@ -286,7 +286,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_DATAKEYEDBLOCK);
+                action.setIcon(Assets.DataIcon.DATAKEYEDBLOCK.icon);
                 action.setToolTipText("Add a new Data Keyed Block to the selected item.");
             }
 
@@ -297,7 +297,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_ARRAY);
+                action.setIcon(Assets.DataIcon.ARRAY.icon);
                 action.setToolTipText("Add a new Array to the selected item.");
             }
 
@@ -310,7 +310,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_BOOLEAN);
+                action.setIcon(Assets.DataIcon.BOOLEAN.icon);
                 action.setToolTipText("Add a new Boolean to the selected item.");
             }
 
@@ -323,7 +323,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_STRING);
+                action.setIcon(Assets.DataIcon.STRING.icon);
                 action.setToolTipText("Add a new String to the selected item.");
             }
 
@@ -334,7 +334,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_CHARACTER);
+                action.setIcon(Assets.DataIcon.CHARACTER.icon);
                 action.setToolTipText("Add a new Character to the selected item.");
             }
 
@@ -347,7 +347,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_INTEGER);
+                action.setIcon(Assets.DataIcon.INTEGER.icon);
                 action.setToolTipText("Add a new Integer to the selected item.");
             }
 
@@ -358,7 +358,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_BYTE);
+                action.setIcon(Assets.DataIcon.BYTE.icon);
                 action.setToolTipText("Add a new Byte to the selected item.");
             }
 
@@ -369,7 +369,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_FLOAT);
+                action.setIcon(Assets.DataIcon.FLOAT.icon);
                 action.setToolTipText("Add a new Float to the selected item.");
             }
 
@@ -380,7 +380,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_DOUBLE);
+                action.setIcon(Assets.DataIcon.DOUBLE.icon);
                 action.setToolTipText("Add a new Double to the selected item.");
             }
 
@@ -391,7 +391,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_LONG);
+                action.setIcon(Assets.DataIcon.LONG.icon);
                 action.setToolTipText("Add a new Long to the selected item.");
             }
 
@@ -402,7 +402,7 @@ public class JFrameSHCMDataEditor extends JFrame {
 
                     }
                 });
-                action.setIcon(Assets.ICON_SHORT);
+                action.setIcon(Assets.DataIcon.SHORT.icon);
                 action.setToolTipText("Add a new Short to the selected item.");
             }
 
@@ -484,6 +484,7 @@ public class JFrameSHCMDataEditor extends JFrame {
             });
 
             valueTree.setCellRenderer(new DataCellRenderer());
+            valueTree.setToggleClickCount(0);
 
             add(scrollPane);
             scrollPane.requestFocus();
