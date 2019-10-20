@@ -9,7 +9,7 @@ import java.awt.*;
 import java.io.File;
 
 public class SHCMDataEditor {
-    public static final String version = "0.2";
+    public static final String version = "0.3";
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

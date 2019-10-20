@@ -2,6 +2,7 @@ package shcm.shsupercm.data.editor.management;
 
 import shcm.shsupercm.data.editor.gui.Assets;
 import shcm.shsupercm.data.editor.gui.JFrameSHCMDataEditor;
+import shcm.shsupercm.data.framework.DataBlock;
 import shcm.shsupercm.data.framework.DataKeyedBlock;
 import shcm.shsupercm.data.utils.DataStringConversion;
 
@@ -45,7 +46,7 @@ public class DataEntry extends DefaultMutableTreeNode {
 
         if(value.getClass().isArray())
             dataIconSubType = Assets.DataIcon.getFor(value.getClass().getComponentType());
-        else if(value instanceof DataKeyedBlock && ((DataKeyedBlock)value).keyType != null)
+        else if(value instanceof DataKeyedBlock && ((DataKeyedBlock)value).keyType != null && ((DataKeyedBlock)value).keyType != String.class)
             dataIconSubType = Assets.DataIcon.getFor(((DataKeyedBlock)value).keyType);
         else
             dataIconSubType = null;
@@ -110,15 +111,13 @@ public class DataEntry extends DefaultMutableTreeNode {
 
     @SuppressWarnings("unchecked")
     public void setValue(Object newVal) {
-        if(parent == null)
-            return;
-        if(newVal == null)
+        if(newVal == null || parent == null)
             delete();
         else {
             if (parent.value instanceof DataKeyedBlock) {
                 ((DataKeyedBlock) parent.value).set(key, newVal);
             } else if (parent.value.getClass().isArray()) {
-                Array.set(parent, (Integer) key, newVal);
+                Array.set(parent.value, (Integer) key, newVal);
             }
         }
         this.value = newVal;
@@ -139,21 +138,23 @@ public class DataEntry extends DefaultMutableTreeNode {
     }
 
     public void addChild(Object newKey, Object newVal) {
-        if(newKey == null || newVal == null)
+        if(newVal == null)
             return;
 
+        Object k = newKey;
+
         if (value instanceof DataKeyedBlock) {
-            if(!((DataKeyedBlock)value).isCorrectKeyType(newKey))
+            if(!((DataKeyedBlock)value).isCorrectKeyType(k))
                 return;
 
             //noinspection unchecked
-            ((DataKeyedBlock) value).set(newKey, newVal);
+            ((DataKeyedBlock) value).set(k, newVal);
         } else if (value.getClass().isArray()) {
-            if(!(newKey instanceof Integer))
+            if(!(k instanceof Integer))
                 return;
 
             int originalLength = Array.getLength(value);
-            int index = (int) newKey;
+            int index = (int) k;
             if(index < 0)
                 index = originalLength;
 

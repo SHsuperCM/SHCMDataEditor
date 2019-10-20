@@ -8,7 +8,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class EditEntryDialog extends JDialog {
@@ -118,40 +117,43 @@ public class EditEntryDialog extends JDialog {
             valueTextField.setAlignmentX(LEFT_ALIGNMENT);
             valueTextField.setMaximumSize(new Dimension(512, 23));
             valueTextField.setHorizontalAlignment(SwingConstants.LEFT);
-            valueTextField.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
-                    try {
-                        newValue = DataStringConversion.fromString(valueTextField.getText());
-                    } catch (Exception ex) {
-                        valueTextField.setBackground(MALFORMED_COLOR);
-                        newValue = null;
+            if(dataEntry.parent == null)
+                valueTextField.setEditable(false);
+            else
+                valueTextField.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
+                        try {
+                            newValue = DataStringConversion.fromString(valueTextField.getText());
+                        } catch (Exception ex) {
+                            valueTextField.setBackground(MALFORMED_COLOR);
+                            newValue = null;
+                        }
                     }
-                }
 
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
-                    try {
-                        newValue = DataStringConversion.fromString(valueTextField.getText());
-                    } catch (Exception ex) {
-                        valueTextField.setBackground(MALFORMED_COLOR);
-                        newValue = null;
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
+                        try {
+                            newValue = DataStringConversion.fromString(valueTextField.getText());
+                        } catch (Exception ex) {
+                            valueTextField.setBackground(MALFORMED_COLOR);
+                            newValue = null;
+                        }
                     }
-                }
 
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
-                    try {
-                        newValue = DataStringConversion.fromString(valueTextField.getText());
-                    } catch (Exception ex) {
-                        valueTextField.setBackground(MALFORMED_COLOR);
-                        newValue = null;
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+                        valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
+                        try {
+                            newValue = DataStringConversion.fromString(valueTextField.getText());
+                        } catch (Exception ex) {
+                            valueTextField.setBackground(MALFORMED_COLOR);
+                            newValue = null;
+                        }
                     }
-                }
-            });
+                });
 
             this.add(valueTextField);
         }

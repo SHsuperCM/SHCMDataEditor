@@ -10,7 +10,6 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.*;
-import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -22,7 +21,6 @@ import java.util.HashSet;
 public class JFrameSHCMDataEditor extends JFrame {
     public OpenFileHandler openFileHandler;
     public JTree valueTree;
-    public JToolBar toolBar;
 
     public HashSet<String> openedPaths = new HashSet<>();
 
@@ -264,175 +262,7 @@ public class JFrameSHCMDataEditor extends JFrame {
         }
 
         {
-            toolBar = new JToolBar();
-
-            toolBar.setRequestFocusEnabled(false);
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.DATABLOCK.icon);
-                action.setToolTipText("Add a new Data Block to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.DATAKEYEDBLOCK.icon);
-                action.setToolTipText("Add a new Data Keyed Block to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.ARRAY.icon);
-                action.setToolTipText("Add a new Array to the selected item.");
-            }
-
-            toolBar.addSeparator();
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.BOOLEAN.icon);
-                action.setToolTipText("Add a new Boolean to the selected item.");
-            }
-
-            toolBar.addSeparator();
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.STRING.icon);
-                action.setToolTipText("Add a new String to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.CHARACTER.icon);
-                action.setToolTipText("Add a new Character to the selected item.");
-            }
-
-            toolBar.addSeparator();
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.INTEGER.icon);
-                action.setToolTipText("Add a new Integer to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.BYTE.icon);
-                action.setToolTipText("Add a new Byte to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.FLOAT.icon);
-                action.setToolTipText("Add a new Float to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.DOUBLE.icon);
-                action.setToolTipText("Add a new Double to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.LONG.icon);
-                action.setToolTipText("Add a new Long to the selected item.");
-            }
-
-            {
-                JButton action = toolBar.add(new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-
-                    }
-                });
-                action.setIcon(Assets.DataIcon.SHORT.icon);
-                action.setToolTipText("Add a new Short to the selected item.");
-            }
-
-            add(toolBar, BorderLayout.NORTH);
-        }
-
-        {
             valueTree = new JTree();
-
-            valueTree.addTreeSelectionListener(e -> {
-                boolean canAddItems = valueTree.getSelectionCount() == 1;
-                if(canAddItems) {
-                    try {
-                        Object value = ((DataEntry) valueTree.getLastSelectedPathComponent()).value;
-                        canAddItems = !(
-                                value instanceof String ||
-                                value instanceof Boolean ||
-                                value instanceof Byte ||
-                                value instanceof Short ||
-                                value instanceof Character ||
-                                value instanceof Integer ||
-                                value instanceof Float ||
-                                value instanceof Long ||
-                                value instanceof Double);
-                    } catch (Exception ignored) {
-                        canAddItems = false;
-                    }
-                }
-                for (Component component : toolBar.getComponents()) component.setEnabled(canAddItems);
-            });
 
             valueTree.addMouseListener(new MouseAdapter() {
                 @Override
@@ -496,14 +326,13 @@ public class JFrameSHCMDataEditor extends JFrame {
     public void refresh() {
         if(openFileHandler == null) {
             this.setTitle("SHCMData Editor");
-            for (Component component : this.toolBar.getComponents()) component.setEnabled(false);
             this.valueTree.setEnabled(false);
             this.openedPaths.clear();
             this.valueTree.setModel(null);
         } else {
             this.setTitle("SHCMData Editor - " + openFileHandler.getText() + (openFileHandler.changed ? " *" : ""));
-            for (Component component : this.toolBar.getComponents()) component.setEnabled(false);
             this.valueTree.setEnabled(true);
+            this.valueTree.setBackground(openFileHandler.changed ? EditEntryDialog.CHANGED_COLOR : Color.WHITE);
 
             this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, openFileHandler.getText(), openFileHandler.data, this), true));
 
