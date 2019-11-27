@@ -18,9 +18,13 @@ public class DataEntry extends DefaultMutableTreeNode {
     public String keyString;
     public String valueString;
 
-    public final Assets.DataIcon dataIconType;
-    public final Assets.DataIcon dataIconSubType;
-    public final boolean canHaveChildren;
+    public Assets.DataIcon dataIconType;
+    public Assets.DataIcon dataIconSubType;
+    public boolean canHaveChildren;
+
+    protected DataEntry() {
+
+    }
 
     DataEntry(DataEntry parent, Object key, Object value) {
         this.parent = parent;
@@ -174,5 +178,4 @@ public class DataEntry extends DefaultMutableTreeNode {
             setValue(newArray);
         }
     }
-
 }

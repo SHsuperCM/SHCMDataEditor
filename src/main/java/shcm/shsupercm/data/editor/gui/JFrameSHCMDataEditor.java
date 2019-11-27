@@ -3,6 +3,7 @@ package shcm.shsupercm.data.editor.gui;
 import shcm.shsupercm.data.SHCMData;
 import shcm.shsupercm.data.editor.SHCMDataEditor;
 import shcm.shsupercm.data.editor.management.DataEntry;
+import shcm.shsupercm.data.editor.management.DummyDataEntry;
 import shcm.shsupercm.data.editor.management.OpenFileHandler;
 import shcm.shsupercm.data.framework.DataBlock;
 
@@ -19,6 +20,8 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 
 public class JFrameSHCMDataEditor extends JFrame {
+    public static final Color CHANGED_COLOR = new Color(0xE0FFD9);
+
     public OpenFileHandler openFileHandler;
     public JTree valueTree;
 
@@ -276,8 +279,17 @@ public class JFrameSHCMDataEditor extends JFrame {
                     } else if(SwingUtilities.isRightMouseButton(e)) {
                         DataEntry dataEntry = (DataEntry) valueTree.getPathForRow(row).getLastPathComponent();
                         valueTree.setSelectionRow(row);
-                        if(dataEntry.parent != null) {
-                            new JPopupMenu() {{
+                        new JPopupMenu() {{
+                            if(dataEntry.canHaveChildren)
+                                add(new JMenuItem(new AbstractAction("Add") {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        new EditEntryDialog(JFrameSHCMDataEditor.this, new DummyDataEntry(dataEntry)) {
+
+                                        }.setVisible(true);
+                                    }
+                                }));
+                            if(dataEntry.parent != null) {
                                 add(new JMenuItem(new AbstractAction("Edit") {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
@@ -292,8 +304,8 @@ public class JFrameSHCMDataEditor extends JFrame {
                                         refresh();
                                     }
                                 }));
-                            }}.show(e.getComponent(), e.getX(), e.getY());
-                        }
+                            }
+                        }}.show(e.getComponent(), e.getX(), e.getY());
                     }
                 }
             });
@@ -332,7 +344,7 @@ public class JFrameSHCMDataEditor extends JFrame {
         } else {
             this.setTitle("SHCMData Editor - " + openFileHandler.getText() + (openFileHandler.changed ? " *" : ""));
             this.valueTree.setEnabled(true);
-            this.valueTree.setBackground(openFileHandler.changed ? EditEntryDialog.CHANGED_COLOR : Color.WHITE);
+            this.valueTree.setBackground(openFileHandler.changed ? CHANGED_COLOR : Color.WHITE);
 
             this.valueTree.setModel(new DefaultTreeModel(DataEntry.read(null, openFileHandler.getText(), openFileHandler.data, this), true));
 

@@ -1,6 +1,8 @@
 package shcm.shsupercm.data.editor.gui;
 
 import shcm.shsupercm.data.editor.management.DataEntry;
+import shcm.shsupercm.data.editor.management.DummyDataEntry;
+import shcm.shsupercm.data.framework.DataKeyedBlock;
 import shcm.shsupercm.data.utils.DataStringConversion;
 
 import javax.swing.*;
@@ -9,10 +11,13 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Array;
 
 public class EditEntryDialog extends JDialog {
     public static final Color CHANGED_COLOR = new Color(0xC8FFBB);
     public static final Color MALFORMED_COLOR = new Color(0xFFB3B3);
+
+    protected JFrameSHCMDataEditor owner;
 
     public final DataEntry dataEntry;
     public JTextField keyTextField;
@@ -23,8 +28,9 @@ public class EditEntryDialog extends JDialog {
 
     public EditEntryDialog(JFrameSHCMDataEditor owner, DataEntry entry) {
         super(owner);
+        this.owner = owner;
         this.dataEntry = entry;
-        if (entry == null)
+        if (dataEntry == null)
             return;
 
         this.setTitle("Edit entry");
@@ -75,6 +81,7 @@ public class EditEntryDialog extends JDialog {
                     keyTextField.setBackground(keyTextField.getText().equals(dataEntry.keyString) ? Color.WHITE : CHANGED_COLOR);
                     try {
                         newKey = DataStringConversion.fromString(keyTextField.getText());
+                        testKey(newValue);
                     } catch (Exception ex) {
                         keyTextField.setBackground(MALFORMED_COLOR);
                         newKey = null;
@@ -86,6 +93,7 @@ public class EditEntryDialog extends JDialog {
                     keyTextField.setBackground(keyTextField.getText().equals(dataEntry.keyString) ? Color.WHITE : CHANGED_COLOR);
                     try {
                         newKey = DataStringConversion.fromString(keyTextField.getText());
+                        testKey(newValue);
                     } catch (Exception ex) {
                         keyTextField.setBackground(MALFORMED_COLOR);
                         newKey = null;
@@ -97,6 +105,7 @@ public class EditEntryDialog extends JDialog {
                     keyTextField.setBackground(keyTextField.getText().equals(dataEntry.keyString) ? Color.WHITE : CHANGED_COLOR);
                     try {
                         newKey = DataStringConversion.fromString(keyTextField.getText());
+                        testKey(newValue);
                     } catch (Exception ex) {
                         keyTextField.setBackground(MALFORMED_COLOR);
                         newKey = null;
@@ -126,6 +135,7 @@ public class EditEntryDialog extends JDialog {
                         valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
                         try {
                             newValue = DataStringConversion.fromString(valueTextField.getText());
+                            testValue(newValue);
                         } catch (Exception ex) {
                             valueTextField.setBackground(MALFORMED_COLOR);
                             newValue = null;
@@ -137,6 +147,7 @@ public class EditEntryDialog extends JDialog {
                         valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
                         try {
                             newValue = DataStringConversion.fromString(valueTextField.getText());
+                            testValue(newValue);
                         } catch (Exception ex) {
                             valueTextField.setBackground(MALFORMED_COLOR);
                             newValue = null;
@@ -148,6 +159,7 @@ public class EditEntryDialog extends JDialog {
                         valueTextField.setBackground(valueTextField.getText().equals(dataEntry.valueString) ? Color.WHITE : CHANGED_COLOR);
                         try {
                             newValue = DataStringConversion.fromString(valueTextField.getText());
+                            testValue(newValue);
                         } catch (Exception ex) {
                             valueTextField.setBackground(MALFORMED_COLOR);
                             newValue = null;
@@ -178,13 +190,8 @@ public class EditEntryDialog extends JDialog {
             buttonPanel.add(new JButton(new AbstractAction("Apply") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (newValue != null)
-                        dataEntry.setValue(newValue);
-                    if (newKey != null)
-                        dataEntry.setNewKey(newKey);
+                    setValues();
 
-                    owner.openFileHandler.changed = true;
-                    owner.refresh();
                     EditEntryDialog.this.setVisible(false);
                     EditEntryDialog.this.dispose();
                 }
@@ -205,16 +212,36 @@ public class EditEntryDialog extends JDialog {
         getRootPane().registerKeyboardAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (newValue != null)
-                    dataEntry.setValue(newValue);
-                if (newKey != null)
-                    dataEntry.setNewKey(newKey);
+                setValues();
 
-                owner.openFileHandler.changed = true;
-                owner.refresh();
                 EditEntryDialog.this.setVisible(false);
                 EditEntryDialog.this.dispose();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+    }
+
+    private void testKey(Object newValue) throws Exception {
+        if(dataEntry.parent.value.getClass().isArray() && (!(newKey instanceof Integer) || (Integer)newKey >= Array.getLength(dataEntry.parent.value)))
+            throw new Exception();
+        if(dataEntry.parent.value instanceof DataKeyedBlock && !newKey.getClass().equals(((DataKeyedBlock) dataEntry.parent.value).keyType))
+            throw new Exception();
+    }
+
+    private void testValue(Object newValue) throws Exception {
+        if(dataEntry.parent.value.getClass().isArray() && !dataEntry.parent.value.getClass().getComponentType().isInstance(newValue))
+            throw new Exception();
+    }
+
+    protected void setValues() {
+        if(dataEntry instanceof DummyDataEntry) {
+            dataEntry.parent.addChild(newKey, newValue);
+        } else {
+            if (newValue != null)
+                dataEntry.setValue(newValue);
+            if (newKey != null)
+                dataEntry.setNewKey(newKey);
+        }
+        owner.openFileHandler.changed = true;
+        owner.refresh();
     }
 }
